@@ -1,2 +1,4 @@
-this is the crvs repository 
-there are two branchs  main and front-end 
+This is the crvs repository
+there are two branches main and front-end
+
+Your directory&file naming always should follow cameCase
