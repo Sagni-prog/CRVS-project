@@ -55,7 +55,7 @@ input {
 .form-input {
   outline: none;
   border-radius: 5px;
-  height: 30px;
+  height: 25px;
 }
 
 .flex-row {
@@ -66,4 +66,201 @@ input {
 .flex-col {
   display: flex;
   flex-direction: column;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.m-1 {
+  margin: 5px;
+}
+
+.m-2 {
+  margin: 10px;
+}
+
+.m-3 {
+  margin: 15px;
+}
+
+.m-4 {
+  margin: 20px;
+}
+
+.m-5 {
+  margin: 25px;
+}
+/* horizontal margin*/
+.mx-1 {
+  margin: 0 5px;
+}
+
+.mx-2 {
+  margin: 0 10px;
+}
+
+.mx-3 {
+  margin: 0 15px;
+}
+
+.mx-4 {
+  margin: 0 20px;
+}
+
+.mx-5 {
+  margin: 0 25px;
+}
+/* Vertical/Y margin */
+.my-1 {
+  margin: 5px 0;
+}
+
+.my-2 {
+  margin: 10px 0;
+}
+
+.my-3 {
+  margin: 15px 0;
+}
+
+.my-4 {
+  margin: 20px 0;
+}
+
+.my-5 {
+  margin: 25px 0;
+}
+
+.m-25 {
+  margin: 25%;
+}
+
+.m-50 {
+  margin: 50%;
+}
+.mx-25 {
+  margin: 0 25%;
+}
+
+.mx-50 {
+  margin: 0 50%;
+}
+.my-25 {
+  margin: 25% 0;
+}
+
+.my-50 {
+  margin: 50% 0;
+}
+.m-auto {
+  margin: auto;
+}
+
+.mx-auto {
+  margin: 0 auto;
+}
+.my-auto {
+  margin: auto 0;
+}
+/*padding */
+.p-0 {
+  padding: 0;
+}
+
+.p-1 {
+  padding: 5px;
+}
+.p-2 {
+  padding: 10px;
+}
+
+.p-3 {
+  padding: 15px;
+}
+
+.p-4 {
+  padding: 20px;
+}
+
+.p-5 {
+  padding: 25px;
+}
+
+.px-1 {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.px-2 {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.px-3 {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.px-4 {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.px-5 {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+/*vertical/y padding*/
+.py-1 {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+.py-2 {
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+.py-3 {
+  padding-bottom: 15px;
+  padding-top: 15px;
+}
+
+.py-4 {
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+.py-5 {
+  padding-bottom: 25px;
+  padding-top: 25px;
+}
+
+/*Border radiuses */
+
+.b-1 {
+  border-radius: 5px;
+}
+.b-2 {
+  border-radius: 10px;
+}
+.b-3 {
+  border-radius: 15px;
+}
+.b-4 {
+  border-radius: 20px;
+}
+.b-5 {
+  border-radius: 25px;
+}
+
+/* circle */
+
+.b-50 {
+  border-radius: 50%;
+}
+
+.cont {
+  width: 200px;
+  box-shadow: 2px 2px 5px black;
 }
