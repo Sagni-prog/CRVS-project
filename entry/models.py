@@ -3,144 +3,136 @@ import uuid
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.core.mail import send_mail
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractUser, User
+from django.core.files.storage import FileSystemStorage
 
 
 
-class AccountManager(BaseUserManager):
-    def create_superuser(self, email, name, password, **other_fields):
-        user_type_data = ((1,"Resident", (2,"Kebele_employee")))
+class User(AbstractUser):
+        user_type_data = ((1,"Resident"), (2,"KebeleEmploye"))
         user_type = models.CharField(default=1,choices=user_type_data, max_length=10)
-        other_fields.setdefault('is_residents', True)
-        other_fields.setdefault('is_superuser', True)
-        other_fields.setdefault('is_active', True)
-        if other_fields.get('is_residents') is not True:
-            raise ValueError('Superuser must be assigned to is_residents=True.')
-        if other_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must be assigned to is_superuser=True.')
+        name = models.CharField(max_length=100, null=True)
+        username = models.EmailField(max_length=100, null=True)
+        email = models.EmailField(unique=True, null=True)
+        bio = models.TextField(null=True)
 
-        return self.create_user(email, name, password, **other_fields)
+        avatar = models.ImageField(null=True, default="avatar.svg")
 
-    @receiver(post_save, sender='User')
-    def create_user(self, sender,instance, email, name, password, **other_fields):
-        if not email:
-            raise ValueError(_('You must provide an email address'))
-        email = self.normalize_email(email)
-        user = self.model(email=email, name=name,**other_fields)
-        user.set_password(password)
-        if instance.user_type == 1:
-            residents.object.create(residents=instance)
-        if instance.user_type == 2:
-            residents.object.create(Kebele_employee=instance)
-                
-    @receiver(post_save, sender='User')
-    def save_user(self, sender,instance, email, name, password, **other_fields):
-        if instance.user_type == 1:
-            instance.residents.save()
-        if instance.user_type == 2:
-            instance.Kebele_employee.save()    
-
-class User(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=200, null=False)
-    last_name = models.CharField(max_length=200, null=False)
-    age = models.IntegerField(max_length=150)
-    sex = models.CharField(_("Male/Fale/Both"), max_length=150)
-    email = models.EmailField(unique=True,null=False)
-    mobile = models.CharField(max_length=20, blank=True)
-    address = models.CharField(_("Town/City/State"), max_length=150)
-    bio = models.TextField(null=True)
-    is_superuser = models.BooleanField(default=False)
-    is_residents = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
-    is_kebele_employee = models.BooleanField(default=False)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-
-    objects = AccountManager()
-    avatar = models.ImageField(null=True, default="avatar.svg")
-
-    USERNAME_FIELD = 'email'
+        USERNAME_FIELD = 'email'
    
-    REQUIRED_FIELDS = []
+        REQUIRED_FIELDS = ['name','username']
+
+
+class Kebele(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    kebele_name = models.CharField(help_text=_("Required"), max_length=255, unique=True)
+    phone = models.CharField(max_length=20, help_text=_("Required"),null=True)
+    email = models.EmailField(help_text=_("Required"))
+    address = models.CharField(_("City"), max_length=150,help_text=_("Required"))
+    fox_number = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
 
     class Meta:
-        db_table = ''
-        managed = True
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
-
-
-
-    def email_user(self, subject, message):
-        send_mail(
-            subject,
-            message,
-            'a@a.com',
-            [self.email],
-            fail_silently=False,
-        )
+        verbose_name = _("Kebele")
+        verbose_name_plural = _("Kebeles")
 
     def __str__(self):
-        return self.name     
-
-
-
-class Address(models.Model):
-    """
-    Address
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, verbose_name=("User"), on_delete=models.CASCADE)
-    full_name = models.CharField(_("Full name"),max_length=150)
-    phone = models.CharField(_("Phone Number"), max_length=50)
-    town_city = models.CharField(_("Town/City/State"), max_length=150)
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
-    default = models.BooleanField(_("Default"), default=False)
-
-    class Meta:
-        db_table = ''
-        managed = True
-        verbose_name = 'address'
-        verbose_name_plural = 'addresss'
-
-        def __str__(self) -> str:
-            return "Address"
-
-
-
-class kebele(models.Model):
-    user = models.ForeignKey(User , on_delete=models.RESTRICT)
-    name = models.CharField(verbose_name=_("kebele"), help_text=_("Required"), max_length=255, unique=True)
-    email = models.EmailField()
-    address = models.CharField(_("Town/City/State"), max_length=150)
-    is_active = models.BooleanField(default=True)
-    fox_number = models.CharField(max_length=100)
-
-
-
+        return self.kebele_name
     
 
+
+class Resident(models.Model):
+    id = models.AutoField(primary_key=True)
+    kebele = models.ForeignKey(Kebele, null=True, on_delete=models.CASCADE)
+    admin = models.OneToOneField(User, on_delete = models.CASCADE)
+    fname = models.CharField(max_length=100,null=True)
+    lname = models.CharField(max_length=100, null=True)
+    age = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20,null=True)
+    email = models.EmailField()
+    address = models.CharField(max_length=150, null=True)
+    sex = models.CharField(max_length=50)
+    bio = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
     class Meta:
-        verbose_name = _("kebele")
-        verbose_name_plural = _("kebeles")
+        verbose_name = _("Resident")
+        verbose_name_plural = _("Residents")
 
     def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse("kebele_detail", kwargs={"pk": self.pk})
+        return self.fname
 
 
+class KebeleEmploye(models.Model):
+    id = models.AutoField(primary_key=True)
+    kebele = models.ForeignKey(Kebele,on_delete=models.CASCADE)
+    admin = models.OneToOneField(User, on_delete = models.CASCADE)
 
-class residents(models.Model):
-    pass
+    fname = models.CharField(max_length=100,null=True)
+    lname = models.CharField(max_length=100, null=True)
+    age = models.CharField(max_length=100,null=True)
+    phone = models.CharField(max_length=20,null=True)
+    email = models.EmailField()
+    profile_pic = models.FileField()
+    address = models.CharField( max_length=150, null=True)
+    sex = models.CharField(max_length=50, null=True)
+    salary = models.CharField(max_length=100,null=True)
+    qualification = models.BooleanField(default=True)
+    bio = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    class Meta:
+
+        verbose_name = 'KebeleEmploye'
+        verbose_name_plural = 'KebeleEmployes'
+
+    def __str__(self):
+        return self.fname
+
+class Vitalevent(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    current_status = models.CharField(max_length=100,null=True)
+    death_date = models.DateTimeField(auto_now_add=True)
+    birth_date = models.DateTimeField(auto_now_add=True)
+    # marital = models.Model(max_length=150, null= True)
+    objects = models.Manager()
+
+    class Meta:
+
+        verbose_name = 'Vitalevent'
+        verbose_name_plural = 'Vitalevents'
+
+    def __str__(self):
+        return self.current_status
 
 
 
-class Kebele_employee(models.Model):
-    pass
+@receiver(post_save, sender=User)
+# Now Creating a Function which will automatically insert data in Residents, kebele_ emp 
+def create_user_profile(sender, instance, created, **kwargs):
+    # if Created is true (Means Data Inserted)
+    if created:
+        # Check the user_type and insert the data in respective tables
+        if instance.user_type == 1:
+            Resident.objects.create(admin=instance)
+        if instance.user_type == 2:
+            KebeleEmploye.objects.create(admin=instance, kebele=Kebele.objects.get(id=1), address="", profile_pic="", sex="")
+        
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if instance.user_type == 1:
+        instance.resident.save()
+    if instance.user_type == 2:
+        instance.kebeleEmploye.save()
