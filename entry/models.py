@@ -1,5 +1,7 @@
 from audioop import reverse
 import uuid
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.core.mail import send_mail
@@ -9,10 +11,11 @@ from django.utils.translation import gettext_lazy as _
 
 class AccountManager(BaseUserManager):
     def create_superuser(self, email, name, password, **other_fields):
+        user_type_data = ((1,"Resident", (2,"Kebele_employee")))
+        user_type = models.CharField(default=1,choices=user_type_data, max_length=10)
         other_fields.setdefault('is_residents', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
-        other_fields.setdefault('is_kebele_employee', True)
         if other_fields.get('is_residents') is not True:
             raise ValueError('Superuser must be assigned to is_residents=True.')
         if other_fields.get('is_superuser') is not True:
@@ -20,22 +23,33 @@ class AccountManager(BaseUserManager):
 
         return self.create_user(email, name, password, **other_fields)
 
-
-    def create_user(self, email, name, password, **other_fields):
+    @receiver(post_save, sender='User')
+    def create_user(self, sender,instance, email, name, password, **other_fields):
         if not email:
             raise ValueError(_('You must provide an email address'))
-
         email = self.normalize_email(email)
         user = self.model(email=email, name=name,**other_fields)
         user.set_password(password)
-        user.save()
-        return user 
-
+        if instance.user_type == 1:
+            residents.object.create(residents=instance)
+        if instance.user_type == 2:
+            residents.object.create(Kebele_employee=instance)
+                
+    @receiver(post_save, sender='User')
+    def save_user(self, sender,instance, email, name, password, **other_fields):
+        if instance.user_type == 1:
+            instance.residents.save()
+        if instance.user_type == 2:
+            instance.Kebele_employee.save()    
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=200, null=False)
+    first_name = models.CharField(max_length=200, null=False)
+    last_name = models.CharField(max_length=200, null=False)
+    age = models.IntegerField(max_length=150)
+    sex = models.CharField(_("Male/Fale/Both"), max_length=150)
     email = models.EmailField(unique=True,null=False)
     mobile = models.CharField(max_length=20, blank=True)
+    address = models.CharField(_("Town/City/State"), max_length=150)
     bio = models.TextField(null=True)
     is_superuser = models.BooleanField(default=False)
     is_residents = models.BooleanField(default=False)
@@ -121,3 +135,12 @@ class kebele(models.Model):
     def get_absolute_url(self):
         return reverse("kebele_detail", kwargs={"pk": self.pk})
 
+
+
+class residents(models.Model):
+    pass
+
+
+
+class Kebele_employee(models.Model):
+    pass
