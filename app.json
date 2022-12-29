@@ -1,0 +1,27 @@
+{
+    "name": "CRVS-CBTP",
+    "description": "An CRVS-Project for Jimma Zone",
+    "repository": "https://github.com/Ammen1/",
+    "website": "",
+    "keyword":[
+        "CRVS",
+        "CRVS",
+        "django",
+        "python"
+    ],
+    "image": "heroku/python",
+    "env": {
+        "DJANGO_SETTINGS_MODULE": "entry.settings",
+        "DEBUG": "True",
+        "ALLOWED_HOSTS": {
+          "value": ".http://127.0.0.1:8000/"
+        }
+      },
+      "buildpacks": [
+        {
+           "url": "/"
+          
+        }
+      ],
+      "success_url": "/"
+}
