@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 
 
 class User(AbstractUser):
-        user_type_data = ((1,"Resident"), (2,"KebeleEmploye"))
+        user_type_data = ((1,"Systemadmin"),(2,"Resident"), (3,"KebeleEmploye"))
         user_type = models.CharField(default=1,choices=user_type_data, max_length=10)
         name = models.CharField(max_length=100, null=True, blank=False)
         username = models.CharField(max_length=100, null=True,blank=False)
@@ -23,6 +23,7 @@ class User(AbstractUser):
         USERNAME_FIELD = 'email'
    
         REQUIRED_FIELDS = ['name','username']
+        
 
 
 class Kebele(models.Model):
@@ -32,7 +33,7 @@ class Kebele(models.Model):
     phone = models.CharField(max_length=20, help_text=_("Required"),null=True,blank=False)
     email = models.EmailField(help_text=_("Required"),blank=False, null=True)
     address = models.CharField(_("City"), max_length=150,help_text=_("Required"), null=True,blank=False)
-    fox_number = models.CharField(max_length=100,null=True, blank=True)
+    po_number = models.CharField(max_length=100,null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -45,7 +46,14 @@ class Kebele(models.Model):
 
     def __str__(self):
         return self.kebele_name
-    
+
+
+class SystemAdmin(models.Model):
+    id = models.AutoField(primary_key=True)
+    admin = models.OneToOneField(User, on_delete = models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager() 
 
 
 class Resident(models.Model):
@@ -68,9 +76,14 @@ class Resident(models.Model):
         verbose_name = _("Resident")
         verbose_name_plural = _("Residents")
 
-    def __str__(self):
-        return self.fname
-
+class FeedBackResident(models.Model):
+    id = models.AutoField(primary_key=True)
+    resident_id = models.ForeignKey(Resident, on_delete=models.CASCADE)
+    feedback = models.TextField()
+    feedback_reply = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
 class KebeleEmploye(models.Model):
     id = models.AutoField(primary_key=True)
@@ -97,14 +110,40 @@ class KebeleEmploye(models.Model):
         verbose_name = 'KebeleEmploye'
         verbose_name_plural = 'KebeleEmployes'
 
-    def __str__(self):
-        return self.fname
+class LeaveReportKebele_employee(models.Model):
+    id = models.AutoField(primary_key=True)
+    kebele_employee_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    leave_date = models.CharField(max_length=255)
+    leave_message = models.TextField()
+    leave_status = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+
+class FeedBackSkebele_employee(models.Model):
+    id = models.AutoField(primary_key=True)
+    KebeleEmploye_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    feedback = models.TextField()
+    feedback_reply = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+
+class Notification_Kebele_employee(models.Model):
+    id = models.AutoField(primary_key=True)
+    kebeleEmploye_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()        
 
 class Vitalevent(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(Resident, null=True,  related_name="users", on_delete=models.RESTRICT)
-    kebele= models.ForeignKey(Kebele, null=True, related_name="kebeles", on_delete=models.RESTRICT)
-    residents = models.ForeignKey(Resident, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True,  related_name="users", on_delete=models.RESTRICT)
+    kebele= models.OneToOneField(Kebele, null=True, related_name="kebeles", on_delete=models.RESTRICT)
+    residents = models.OneToOneField(Resident, null=True, on_delete=models.CASCADE)
     current_status = models.CharField(max_length=100,null=True,blank=True)
     death_date = models.CharField(max_length=100,null=True,blank=True)
     birth_date = models.CharField(max_length=100,null=True,blank=True)
@@ -115,19 +154,9 @@ class Vitalevent(models.Model):
 
         verbose_name = 'Vitalevent'
         verbose_name_plural = 'Vitalevents'
-    def __init__(self,current_status, birht_date,user,kebele,residents,death_date,marital,id):
-        self.current_status = current_status
-        self.birth_date = birht_date
-        self.user = user
-        self.kebele = kebele
-        self.residents = residents
-        self.marital = marital
-        self.death_date = death_date
-        self.birth_date = id
-    #  def __getstate__   
 
-    def __str__(self):
-        return str(self.current_status)
+        
+
 
 
 
@@ -138,13 +167,17 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         # Check the user_type and insert the data in respective tables
         if instance.user_type == 1:
-            Resident.objects.create(admin=instance)
+            SystemAdmin.objects.create(admin=instance)
         if instance.user_type == 2:
+            Resident.objects.create(admin=instance)
+        if instance.user_type == 3:
             KebeleEmploye.objects.create(admin=instance, kebele=Kebele.objects.get(id=1), address="", profile_pic="", sex="")
         
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     if instance.user_type == 1:
-        instance.resident.save()
+        instance.systemadmin.save()
     if instance.user_type == 2:
+        instance.resident.save()
+    if instance.user_type == 3:
         instance.kebeleEmploye.save()
