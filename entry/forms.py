@@ -37,9 +37,17 @@ class KebeleForm(ModelForm):
 class ResidentForm(ModelForm):
     class Meta:
         model = Resident
-        fields = ['fname', 'lname','age','phone', 'email', 'address','sex']        
+        fields = ['fname', 'lname', 'email','address','age','phone','sex']        
 
 
+class EditResidentForm(ModelForm):
+    class Meta:
+        model = Resident
+        fields = ['fname', 'lname', 'email','address','age','phone','sex']
+class EditResidentForm(ModelForm):
+    class Meta:
+        model = Resident
+        fields = ['fname', 'lname', 'email','address','age','phone','sex'] 
 
 class KebeleEmployForm(ModelForm):
     class Meta:
