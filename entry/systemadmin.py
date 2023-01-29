@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_control
 from django.core.files.storage import FileSystemStorage #To upload Profile Picture
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from entry.models import LeaveReportKebele_employee, SessionYearModel, SystemAdmin, User, KebeleEmploye, Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
+from entry.models import KebeleEmploye, LeaveReportKebele_employee, SessionYearModel, SystemAdmin, User,  Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
 from .forms import  KebeleForm, ResidentForm,KebeleEmployForm
 
 from django.core import serializers
@@ -104,23 +104,24 @@ def add_employee(request):
 @login_required(login_url='login')
 def add_employee_save(request):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
+
     if request.method != "POST":
         messages.error(request, "Invalid Method ")
         return redirect('add_employee')
     else:
+        kebele_employee = KebeleEmploye.objects.get(pk=request.user.id)
         form = KebeleEmployForm(request.POST, request.FILES)
         if form.is_valid():
-            fname = request.POST.GET['fname']
-            lname = request.POST.GET['lname']
-            username = request.POST.GET['username']
-            email = request.POST.GET['email']
-            password = request.POST.GET['password']
-            address = request.POST.GET['address']
-            kebele_id = request.POST.GET['kebele_id']
-            gender = request.POST.GETa['gender']
-            employee_id= request.POST.GET['employee_id']
-            phone = request.POST.GET('phone')
-            age = request.POST.GET('age')
+            fname = form.cleaned_data['fname']
+            lname = form.cleaned_data['lname']
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            address =form.cleaned_data['address']
+            kebele = form.cleaned_data['kebele']
+            gender = form.cleaned_data['gender']
+            phone = form.cleaned_data['phone']
+            age = form.cleaned_data['age']
 
 
             # Getting Profile Pic first
@@ -136,19 +137,18 @@ def add_employee_save(request):
         
 
             try:
-                user = User.objects.create_user(username=username, password=password, email=email, fname=fname,age=age,phone=phone,employee_id=employee_id, lname=lname, user_type=2)
+                user = KebeleEmploye.objects.create_user(username=username, password=password, email=email,phone=phone, age=age, fname=fname, lname=lname, user_type=2)
                 user.kebele_employee.address = address
                 user.kebele_employee.gender = gender
-                user.kebele_employee.profile_pic = profile_pic_url
-                user.kebele_employee.ohone = phone
                 user.kebele_employee.age = age
+                user.kebele_employee.phone = phone
+                user.kebele_employee.profile_pic = profile_pic_url
+                # user.kebele_employee.ohone = phone
+                # user.kebele_employee.age = age
 
 
-                kebele_obj = Kebele.objects.get(id=kebele_id )
-                user.kebele_employee.kebele_id = kebele_obj
-
-                employee_obj = KebeleEmploye.objects.get(id=employee_id)
-                user.kebele_employee.employee_id = employee_obj
+                kebele_obj = Kebele.objects.get(id=kebele )
+                user.kebele_employee.kebele = kebele_obj
                 user.save()
                 messages.success(request, "Employee Added Successfully!")
                 return redirect('add_employee')

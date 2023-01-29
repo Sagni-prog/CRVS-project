@@ -223,8 +223,17 @@ class KebeleEmployForm(forms.Form):
         ('NO','NO')
     )
     
-    kebele_id = forms.ChoiceField(label="Kebele", choices=kebele_list, widget=forms.Select(attrs={"class":"form-control"}))
+    kebele = forms.ChoiceField(label="Kebele", choices=kebele_list, widget=forms.Select(attrs={"class":"form-control"}))
+    password = forms.CharField(widget=forms.PasswordInput(
+        attrs={
+            'class': 'form-control',
+            'placeholder': 'Password',
+            'id': 'login-pwd',
+        }
+    ))    
     gender = forms.ChoiceField(label="Gender", choices=gender_list, widget=forms.Select(attrs={"class":"form-control"}))
+    age = forms.CharField(label="Age", max_length=50, widget=forms.TextInput(attrs={"class":"form-control"}))
+    phone = forms.CharField(label="Phone", max_length=50, widget=forms.TextInput(attrs={"class":"form-control"}))
     profile_pic = forms.FileField(label="Profile Pic", required=False, widget=forms.FileInput(attrs={"class":"form-control"}))
 
 
