@@ -77,24 +77,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for employee in employees %}
+                                {% for resident in residents %}
                                 <tr>
-                                <td>{{ employee.admin.id }}</td>
-                                <td>{{ employee.admin.first_name }}</td>
-                                <td>{{ employee.admin.last_name }}</td>
-                                <td>{{ employee.admin.username }}</td>
-                                <td>{{ employee.admin.email }}</td>
-                                <td>{{ employee.address }}</td>
-                                <td>{{ employee.gender }}</td>
-                                <td> <img src="{{ employee.profile_pic }}" style="width: 100px;" /> </td>
-                                <td>{{employee.age}}</td>
-                                <td>{{employee.phone}}</td>
-                                <td>{{ employee.kebele.kebele_name }}</td>
-                                <td>{{ employee.admin.last_login }}</td>
-                                <td>{{ employee.admin.date_joined }}</td>
+                                <td>{{ resident.admin.id }}</td>
+                                <td>{{ resident.admin.first_name }}</td>
+                                <td>{{ resident.admin.last_name }}</td>
+                                <td>{{ resident.admin.username }}</td>
+                                <td>{{ resident.admin.email }}</td>
+                                <td>{{ resident.address }}</td>
+                                <td>{{ resident.gender }}</td>
+                                <td> <img src="{{ resident.profile_pic }}" style="width: 100px;" /> </td>
+                                <td>{{resident.age}}</td>
+                                <td>{{resident.phone}}</td>
+                                <td>{{ resident.kebele.kebele_name }}</td>
+                                <td>{{ resident.admin.last_login }}</td>
+                                <td>{{ resident.admin.date_joined }}</td>
                                 <td>
-                                    <a href="{% url 'edit_employee' employee.admin.id %}" class="btn btn-success">Edit</a> 
-                                    <a href="{% url 'delete_employee' employee.admin.id %}" class="btn btn-danger">Delete</a>
+                                    <a href="{% url 'edit_resident' resident.admin.id %}" class="btn btn-success">Edit</a> 
+                                    <a href="{% url 'delete_resident' resident.admin.id %}" class="btn btn-danger">Delete</a>
                                 </td>
                                 </tr>
                                 {% endfor %}

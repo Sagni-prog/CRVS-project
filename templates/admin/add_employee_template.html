@@ -16,12 +16,12 @@
                     <!-- general form elements -->
                     <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Add Resident</h3>
+                        <h3 class="card-title">Add Employee</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    {% url 'add_resident_save' as action_path %}
-                    {% include 'admin/form_template.html' with messages=messages form=form action_path=action_path button_text="Add Resident" %}
+                    {% url 'add_employee_save' as action_path %}
+                    {% include 'admin/form_template.html' with messages=messages form=form action_path=action_path button_text="Add Employee" %}
 
                     </div>
                     <!-- /.card -->

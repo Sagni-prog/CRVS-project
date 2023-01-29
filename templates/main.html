@@ -8,12 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="{% static 'style/style.css' %}" />
+    <link rel="stylesheet" href=" {% static 'style/main.css' %}  " />
     <title>CBTP!</title>
 </head>
 
 <body>
 
     {% include 'navbar.html' %}
+    <h1 style="text-align: center; color: aqua">It's Working</h1>
+    <img src=" {% static 'img/img.jpg' %} " onclick="imgClick()" />
 
 
     {% if messages %}
@@ -44,6 +47,7 @@
 </footer><!-- End Footer -->
 
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/main.js' %} "></script>
 </body>
 
 </html>

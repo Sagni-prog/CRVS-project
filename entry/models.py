@@ -23,12 +23,24 @@ class User(AbstractUser):
         USERNAME_FIELD = 'email'
    
         REQUIRED_FIELDS = ['name','username']
+
+
+
+
+
+
         
+class SessionYearModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    session_birth_date_year = models.DateField()
+    session_death_date_year = models.DateField()
+    objects = models.Manager()
+
 
 
 class Kebele(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
+    admin = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
     kebele_name = models.CharField(help_text=_("Required"), max_length=255, unique=True, blank=False)
     phone = models.CharField(max_length=20, help_text=_("Required"),null=True,blank=False)
     email = models.EmailField(help_text=_("Required"),blank=False, null=True)
@@ -53,12 +65,13 @@ class SystemAdmin(models.Model):
     admin = models.OneToOneField(User, on_delete = models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager() 
+    objects = models.Manager()
+
 
 
 class Resident(models.Model):
     id = models.AutoField(primary_key=True)
-    kebele = models.OneToOneField(Kebele, null=True, on_delete=models.CASCADE)
+    kebele = models.ForeignKey(Kebele, null=True,on_delete = models.CASCADE)
     admin = models.ForeignKey(User, null=True,on_delete = models.CASCADE)
     fname = models.CharField(max_length=100,null=True)
     lname = models.CharField(max_length=100, null=True)
@@ -67,14 +80,24 @@ class Resident(models.Model):
     email = models.EmailField(null=True)
     address = models.CharField(max_length=150, null=True)
     sex = models.CharField(max_length=50)
-    bio = models.TextField(null=True,)
+    current_status = models.CharField(max_length=100,null=True,blank=True)
+    marital = models.CharField(max_length=150, null= True)
+    death_date = models.ForeignKey(SessionYearModel,null=True, related_name='death', on_delete=models.CASCADE)
+    birth_date = models.ForeignKey(SessionYearModel, null=True, related_name="birth", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    bio = models.TextField(null=True,)
+    
     objects = models.Manager()
+
 
     class Meta:
         verbose_name = _("Resident")
         verbose_name_plural = _("Residents")
+
+
+    def __str__(self):
+        return self.fname    
 
 class FeedBackResident(models.Model):
     id = models.AutoField(primary_key=True)
@@ -88,7 +111,6 @@ class FeedBackResident(models.Model):
 class KebeleEmploye(models.Model):
     id = models.AutoField(primary_key=True)
     kebele = models.ForeignKey(Kebele, null=True, on_delete=models.CASCADE)
-    user = models.ForeignKey(Resident, null=True, on_delete=models.RESTRICT)
     admin = models.ForeignKey(User, null=True, on_delete = models.CASCADE)
     fname = models.CharField(max_length=100,null=True, blank=False)
     lname = models.CharField(max_length=100, null=True,blank=False)
@@ -109,6 +131,10 @@ class KebeleEmploye(models.Model):
 
         verbose_name = 'KebeleEmploye'
         verbose_name_plural = 'KebeleEmployes'
+
+
+    def __str__(self):
+        return self.fname    
 
 class LeaveReportKebele_employee(models.Model):
     id = models.AutoField(primary_key=True)
@@ -139,21 +165,6 @@ class Notification_Kebele_employee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()        
 
-class Vitalevent(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, null=True,  related_name="users", on_delete=models.RESTRICT)
-    kebele= models.OneToOneField(Kebele, null=True, related_name="kebeles", on_delete=models.RESTRICT)
-    residents = models.OneToOneField(Resident, null=True, on_delete=models.CASCADE)
-    current_status = models.CharField(max_length=100,null=True,blank=True)
-    death_date = models.CharField(max_length=100,null=True,blank=True)
-    birth_date = models.CharField(max_length=100,null=True,blank=True)
-    marital = models.CharField(max_length=150, null= True)
-    objects = models.Manager()
-
-    class Meta:
-
-        verbose_name = 'Vitalevent'
-        verbose_name_plural = 'Vitalevents'
 
         
 
