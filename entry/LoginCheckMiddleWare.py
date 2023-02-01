@@ -14,12 +14,12 @@ class LoginCheckMiddleWare(MiddlewareMixin):
         
         if user.is_authenticated:
             if user.user_type == "1":
-                if modulename == "entry.Systemadmin":
+                if modulename == "entry.systemadmin":
                     pass
                 elif modulename == "entry.views" or modulename == "django.views.static":
                     pass
                 else:
-                    return redirect("admin_home")
+                    return redirect("login_register")
             
             elif user.user_type == "2":
                 if modulename == "entry.kebeleemployee":
@@ -27,7 +27,7 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                 elif modulename == "entry.views" or modulename == "django.views.static":
                     pass
                 else:
-                    return redirect("kebeleemployee_home")
+                    return redirect("login_register")
             
             elif user.user_type == "3":
                 if modulename == "entry.resident":
@@ -35,13 +35,13 @@ class LoginCheckMiddleWare(MiddlewareMixin):
                 elif modulename == "entry.views" or modulename == "django.views.static":
                     pass
                 else:
-                    return redirect("home")
+                    return redirect("login_register")
 
             else:
                 return redirect("login_register")
 
         else:
-            if request.path == reverse("login_register") or request.path == reverse("home"):
+            if request.path == reverse("login_register") or request.path == reverse("login_register"):
                 pass
             else:
                 return redirect("login_register")

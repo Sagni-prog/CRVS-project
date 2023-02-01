@@ -1,9 +1,16 @@
 
 import os
 from pathlib import Path
+from . info import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+EMAIL_USE_TLS = EMAIL_USE_TLS
+EMAIL_HOST = EMAIL_HOST
+EMAIL_HOST_USER = EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
+EMAIL_PORT = EMAIL_PORT
 
 
 
@@ -127,3 +134,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 AUTH_USER_MODEL = "entry.User"
+LOGIN_REDIRECT_URL = '/entry/admin_home'
+LOGIN_URL = '/entry/loginPage/'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

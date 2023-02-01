@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_control
 from django.core.files.storage import FileSystemStorage #To upload Profile Picture
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from entry.models import KebeleEmploye, LeaveReportKebele_employee, SessionYearModel, SystemAdmin, User,  Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
+from entry.models import KebeleEmployee, Notification_Kebele_employee, LeaveReportKebele_employee, SessionYearModel, SystemAdmin, User,  Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
 from .forms import  KebeleForm, ResidentForm,KebeleEmployForm
 
 from django.core import serializers
@@ -18,53 +18,56 @@ def admin_home(request):
     #Counting amount of all exit abjects
     all_resident_count = Resident.objects.all().count()
     all_kebele_count = Kebele.objects.all().count()
-    all_kebele_employee_count = KebeleEmploye.objects.all().count()
+    all_kebele_employee_count = KebeleEmployee.objects.all().count()
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
 
 
-    # Total kebele_employe and resident in kebele
+    # # Total kebele_employe and resident in kebele
 
-    kebele_all = Kebele.objects.all()
-    kebele_list_name = []
-    kebele_employee_list = []
-    resident_list = []
-    for kebe in kebele_all:
-        kebele_employees = KebeleEmploye.objects.filter(kebele_id=kebe.id).count()
-        residents= Resident.objects.filter(kebele_id=kebe.id).count()
+    # kebele_all = Kebele.objects.all()
+    # kebele_list_name = []
+    # kebele_employee_list = []
+    # resident_list = []
+    # for kebe in kebele_all:
+    #     kebele_employees = KebeleEmployee.objects.filter(admin_id=kebe.id).count()
+    #     residents= Resident.objects.filter(kebele_id=kebe.id).count()
 
-        kebele_list_name.append(kebe.kebele_name)
-        kebele_employee_list.append(kebele_employees)
-        resident_list.append(residents)
+    #     kebele_list_name.append(kebe.kebele_name)
+    #     kebele_employee_list.append(kebele_employees)
+    #     resident_list.append(residents)
     
 
-    employee = KebeleEmploye.objects.all()
-    employee_list = []
-    for emplo in employee:
-        employee = KebeleEmploye.objects.filter(id=emplo.id)
-        employee_list.append(employee)
+    # employee = KebeleEmployee.objects.all()
+    # employee_list = []
+    # resident_count_list_in_kebele=[]
+    # for emplo in employee:
+    #     kebele = Kebele.objects.get(kebeleemployee=emplo.id)
+    #     resident_count = Resident.objects.filter(kebele_id=kebele.id).count()
+    #     employee_list.append(emplo.fname)
+    #     resident_count_list_in_kebele.append(resident_count)
      
 
-    # for Kebele employee
+    # # for Kebele employee
 
-    kebele_employe_name_list = []
-    kebele_employee_leave_list=[]
+    # kebele_employe_name_list = []
+    # kebele_employee_leave_list=[]
 
-    employees = KebeleEmploye.objects.all() 
-    for employe in employees:
-        kebele_id = Kebele.objects.filter(id=employe.id)
-        leave =  LeaveReportKebele_employee.objects.filter(id__in=kebele_id,leave_status=1).count()
-        kebele_employee_leave_list.append(leave)
-        kebele_employe_name_list.append(employe.fname)
+    # employees = KebeleEmployee.objects.all() 
+    # for employe in employees:
+    #     kebele_id = Kebele.objects.filter(id=employe.id)
+    #     leave =  LeaveReportKebele_employee.objects.filter(id__in=kebele_id,leave_status=1).count()
+    #     kebele_employee_leave_list.append(leave)
+    #     kebele_employe_name_list.append(employe.fname)
 
-    resident_name_list = []
-    resident_list_in_kebele = []
+    # resident_name_list = []
+    # resident_list_in_kebele = []
 
-    residents = Resident.objects.all()
-    for resident in residents:
-        kebele_id = Kebele.objects.filter(resident=resident.id)
-        resident  = Resident.objects.filter(kebele_id = resident.id)
-        resident_name_list.append(resident)
-        resident_list_in_kebele.append(kebele_id)  
+    # residents = Resident.objects.all()
+    # for resident in residents:
+    #     kebele_id = Kebele.objects.filter(resident=resident.id)
+    #     resident  = Resident.objects.filter(kebele_id = resident.id)
+    #     resident_name_list.append(resident)
+    #     resident_list_in_kebele.append(kebele_id)  
 
 
 
@@ -73,13 +76,14 @@ def admin_home(request):
         "all_kebele_count":all_kebele_count,
         "all_kebele_employee_count": all_kebele_employee_count,
         "admin_home":admin_home,
-        "kebele_list_name":kebele_list_name,
-        "kebele_employee_list":kebele_employee_list,
-        "resident_list":resident_list,
-        "employee_list":employee_list,
-        "kebele_employe_name_list":kebele_employe_name_list,
-        "resident_name_list":resident_name_list,
-        "resident_list_in_kebele":resident_list_in_kebele,
+        # "kebele_list_name":kebele_list_name,
+        # "kebele_employee_list":kebele_employee_list,
+        # "resident_list":resident_list,
+        # "employee_list":employee_list,
+        # "resident_count_list_in_kebele":resident_count_list_in_kebele,
+        # "kebele_employe_name_list":kebele_employe_name_list,
+        # "resident_name_list":resident_name_list,
+        # "resident_list_in_kebele":resident_list_in_kebele,
         
 
 
@@ -89,79 +93,57 @@ def admin_home(request):
 
     return render(request , "admin/home_content.html", context)
 
+
+
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
 def add_employee(request):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-    form = KebeleEmployForm()
+    return render(request, "admin/add_employee_template.html")
 
-    context = {
-        "form": form
-    }
-    return render(request, "admin/add_employee_template.html",context)
+
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
 def add_employee_save(request):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-
     if request.method != "POST":
         messages.error(request, "Invalid Method ")
         return redirect('add_employee')
     else:
-        kebele_employee = KebeleEmploye.objects.get(pk=request.user.id)
-        form = KebeleEmployForm(request.POST, request.FILES)
-        if form.is_valid():
-            fname = form.cleaned_data['fname']
-            lname = form.cleaned_data['lname']
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            address =form.cleaned_data['address']
-            kebele = form.cleaned_data['kebele']
-            gender = form.cleaned_data['gender']
-            phone = form.cleaned_data['phone']
-            age = form.cleaned_data['age']
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        address = request.POST.get('address')
+        first_name = request.POST.get('first_name')
+        last_name= request.POST.get('last_name')
+
+        try:
+            user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=2)
+            user.KebeleEmployee.address = address
+            user.kebeleEmployee.first_name = first_name
+            user.kebeleEmployee.last_name = last_name
+            user.save()
+            messages.success(request, "Employee Added Successfully!")
+            return redirect('add_employee')
+        except:
+            messages.error(request, "Failed to Add Employee!")
+            return redirect('add_employee')
 
 
-            # Getting Profile Pic first
-            # First Check whether the file is selected or not
-            # Upload only if file is selected
-            if len(request.FILES) != 0:
-                profile_pic = request.FILES['profile_pic']
-                fs = FileSystemStorage()
-                filename = fs.save(profile_pic.name, profile_pic)
-                profile_pic_url = fs.url(filename)
-            else:
-                profile_pic_url = None
         
 
-            try:
-                user = KebeleEmploye.objects.create_user(username=username, password=password, email=email,phone=phone, age=age, fname=fname, lname=lname, user_type=2)
-                user.kebele_employee.address = address
-                user.kebele_employee.gender = gender
-                user.kebele_employee.age = age
-                user.kebele_employee.phone = phone
-                user.kebele_employee.profile_pic = profile_pic_url
-                # user.kebele_employee.ohone = phone
-                # user.kebele_employee.age = age
 
 
-                kebele_obj = Kebele.objects.get(id=kebele )
-                user.kebele_employee.kebele = kebele_obj
-                user.save()
-                messages.success(request, "Employee Added Successfully!")
-                return redirect('add_employee')
-            except:
-                messages.error(request, "Failed to Add Employee!")
-                return redirect('add_employee')
 
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
 def manage_employee(request):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-    employees = KebeleEmploye.objects.all()
+    employees = KebeleEmployee.objects.all()
     kebele = Kebele.objects.all()
     context = {
         "employees": employees,
@@ -175,29 +157,15 @@ def manage_employee(request):
 @login_required(login_url='login')
 def edit_employee(request, employees_id):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-    employee = KebeleEmploye.objects.get(admin=employees_id)
-    form = KebeleEmployForm(request.POST, request.FILES)
-    # Filling the form with Data frome Database
-
-    form.fields['email'].initial = employee.admin.email
-    form.fields['username'].initial = employee.admin.username
-    form.fields['fname'].initial = employee.admin.fname
-    form.fields['lname'].initial = employee.admin.lname
-    form.fields['address'].initial = employee.address
-    form.fields['kebele_id'].initial = employee.kebele_id.id
-    form.fields['gender'].initial = employee.gender
-    form.fields['session_year_id'].initial = employee.session_year_id.id
-    form.fields['employee_id'].initial = employee.employee_id.id
-
+    employees = KebeleEmployee.objects.get(admin=employees_id)
 
     context = {
+        "employees": employees,
         "id": employees_id,
-        "username": employees_id.admin.username,
-        "form":form
     }
+    return render(request, "admin/edit_employee_template.html", context)
 
 
-    return render(request, "admin/edit_emplooyees_template.html", context)
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
@@ -206,82 +174,40 @@ def edit_employee_save(request):
     if request.method != "POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
     else:
-        kebele_employee_id = request.session.get('kebele_employee_id')
-        if kebele_employee_id == None:
-            return redirect('/manage_employee')
-
-        form = KebeleEmployForm(request.POST, request.FILES)
-        if form.is_valid:
-            fname = form.cleaned_data['fname']
-            lname = form.cleaned_data['lname']
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            address = form.cleaned_data['address']
-            session_year_id =form.cleaned_data['session_year_id']
-            kebele_id = form.cleaned_data['kebele_id']
-            gender = form.cleaned_data['gender']
-            employee_id= form.cleaned_data['employee_id']
-
-            # Getting Profile Pic first
-            # First Check whether the file is selected or not
-            # Upload only if file is selected
-            if len(request.FILES) != 0:
-                profile_pic = request.FILES['profile_pic']
-                fs = FileSystemStorage()
-                filename = fs.save(profile_pic.name, profile_pic)
-                profile_pic_url = fs.url(filename)
-            else:
-                profile_pic_url = None
+        employees_id = request.POST.get('employees_id')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        address = request.POST.get('address')
 
         try:
             # INSERTING into user Model
-            user = User.objects.get(id=kebele_employee_id)
-            user.fname = fname
-            user.lname = lname
+            user = User.objects.get(id=employees_id)
+            user.first_name = first_name
+            user.last_name = last_name
             user.email = email
             user.username = username
-            # user.phone = phone
             user.save()
             
-            # INSERTING into Employee Model
-            employee_model = KebeleEmploye.objects.get(admin=kebele_employee_id)
+            # INSERTING into Staff Model
+            employee_model = KebeleEmployee.objects.get(admin=employees_id)
             employee_model.address = address
-            
-
-            kebele = Kebele.objects.get(id = kebele_id)
-            employee_model.kebele_id = kebele
-            
-            employee = Kebele.objects.get(id = employee_id)
-            employee_model.employee_id = employee
-
-            session_year_obj = SessionYearModel.objects.get(id=session_year_id)
-            employee_model.session_year_id = session_year_obj 
-
-
-            employee_model.gender = gender
-            if profile_pic_url != None:
-                employee_model.profile_pic = profile_pic_url
-
             employee_model.save()
 
-            # Delete Employee_id SESSION after the data is updated
-
-            del request.session['kebele_employee_id']    
-            
-
             messages.success(request, "Employee Updated Successfully.")
-            return redirect('/edit_employee/'+kebele_employee_id)
+            return redirect('/edit_employee/'+employees_id)
 
         except:
-            messages.error(request, "Failed to Update Staff.")
-            return redirect('/edit_employee/'+kebele_employee_id)
+            messages.error(request, "Failed to Update Employee.")
+            return redirect('/edit_employee/'+employees_id)
 
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
 def delete_employee(request, employee_id):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-    employee = KebeleEmploye.objects.get(admin=employee_id)
+    employee = KebeleEmployee.objects.get(admin=employee_id)
     try:
         employee.delete()
         messages.success(request, "Employee Deleted Successfully.")
@@ -328,8 +254,8 @@ def add_resident_save(request):
             session_year_id = form.cleaned_data['session_year_id']
             birth_date_year = form.cleaned_data['birth_date_year']
             death_date_year = form.cleaned_data['death_date_year']
-            current_status = form.cleaned_data('current_status')
-            marital = form.cleaned_data('marital')
+            current_status = form.cleaned_data['current_status']
+            marital = form.cleaned_data['marital']
 
 
             # Getting Profile Pic first
@@ -464,7 +390,7 @@ def edit_resident_save(request):
                 resident_model.sex = sex
 
                 session_year_obj = SessionYearModel.objects.get(id=session_year_id)
-                user.residents.session_year_id = session_year_obj
+                user.resident.session_year_id = session_year_obj
 
                 # vitalevent_obj =Vitalevent.objects.get(id=vitalevent_id)
                 # resident_model.viltalevent_id = vitalevent_obj
@@ -589,13 +515,7 @@ def employee_leave_reject(request, leave_id):
 @login_required(login_url='login')
 def add_kebele(request):
     admin_home = SystemAdmin.objects.get(admin=request.user.id)
-
-    form = KebeleForm()
-
-    context = {
-        'form':form
-    }
-    return render(request, "admin/add_kebele_template.html", context)
+    return render(request, "admin/add_kebele_template.html")
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
@@ -605,23 +525,16 @@ def add_kebele_save(request):
         messages.error(request, "Invalid Method!")
         return redirect('add_kebele')
     else:
-        form = KebeleForm()
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            kebele_name = form.cleaned_data['kebele_name']
-            username = form.cleaned_data['username']
-            address = form.cleaned_data['address']
-            po_number = form.cleaned_data['po_number']
-      
+        kebele = request.POST.get('kebele')
         try:
-            kebele = Kebele.objects.create_user(username=username,  email=email,kebele_name=kebele_name,po_number=po_number)
-            kebele.kebele.address = address
-            kebele.save()
-            messages.success(request, "Kebele Added Successfully!")
+            course_model = Kebele(kebele_name=kebele)
+            course_model.save()
+            messages.success(request, "Course Added Successfully!")
             return redirect('add_kebele')
         except:
-            messages.error(request, "Failed to Add Kebele!")
+            messages.error(request, "Failed to Add Course!")
             return redirect('add_kebele')
+
 
 @cache_control(no_data=True, must_revalidade=True, no_strore=True)
 @login_required(login_url='login')
@@ -656,7 +569,7 @@ def edit_kebele_save(request):
 
         try:
             kebele = Kebele.objects.get(id=kebele_id)
-            kebele.course_name = kebele_name
+            kebele.kebele_name = kebele_name
             kebele.save()
 
             messages.success(request, "Kebele Updated Successfully.")

@@ -1,7 +1,7 @@
 {% extends 'admin/base_template.html' %}
 
 {% block page_title %}
-    Add Kebele
+    Edit Kebele | #ID : {{ kebele.id }}
 {% endblock page_title %}
 
 {% block main_content %}
@@ -16,11 +16,11 @@
                     <!-- general form elements -->
                     <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Add Kebele</h3>
+                        <h3 class="card-title">Edit Kebele</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <form role="form" method="POST" action="{% url 'add_kebele_save' %}">
+                    <form role="form" method="POST" action="{% url 'edit_kebele_save' %}">
                         {% csrf_token %}
 
                         
@@ -53,13 +53,15 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label>Kebele Name </label>
-                                <input type="text" class="form-control" name="Kebele" placeholder="Enter Kebele">
+                                <input type="text" class="form-control" name="kebele" value="{{ kebele.kebele_name }}">
+                                <input type="hidden" name="kebele_id" value="{{ kebele.id }}" />
                             </div>
 
                         </div>
+                        <!-- /.card-body -->
 
                         <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Add Kebele</button>
+                        <button type="submit" class="btn btn-primary">Update Kebele</button>
                         </div>
                     </form>
                     </div>

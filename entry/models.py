@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 
 
 class User(AbstractUser):
-        user_type_data = ((1,"Systemadmin"),(2,"Resident"), (3,"KebeleEmploye"))
+        user_type_data = ((1,"Systemadmin"),(2,"Resident"), (3,"KebeleEmployee"))
         user_type = models.CharField(default=1,choices=user_type_data, max_length=10)
         name = models.CharField(max_length=100, null=True, blank=False)
         username = models.CharField(max_length=100, null=True,blank=False)
@@ -23,24 +23,24 @@ class User(AbstractUser):
         USERNAME_FIELD = 'email'
    
         REQUIRED_FIELDS = ['name','username']
-
-
-
+  
 
 
 
         
 class SessionYearModel(models.Model):
     id = models.AutoField(primary_key=True)
-    session_birth_date_year = models.DateField()
-    session_death_date_year = models.DateField()
+    session_birth_date_year = models.DateField(blank=True)
+    session_death_date_year = models.DateField(blank=True)
+    is_system_admin = models.BooleanField(default=True)
     objects = models.Manager()
+
 
 
 
 class Kebele(models.Model):
     id = models.AutoField(primary_key=True)
-    admin = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
+    admin = models.OneToOneField(User,null=True,on_delete=models.CASCADE)
     kebele_name = models.CharField(help_text=_("Required"), max_length=255, unique=True, blank=False)
     phone = models.CharField(max_length=20, help_text=_("Required"),null=True,blank=False)
     email = models.EmailField(help_text=_("Required"),blank=False, null=True)
@@ -60,6 +60,8 @@ class Kebele(models.Model):
         return self.kebele_name
 
 
+
+
 class SystemAdmin(models.Model):
     id = models.AutoField(primary_key=True)
     admin = models.OneToOneField(User, on_delete = models.CASCADE)
@@ -69,24 +71,41 @@ class SystemAdmin(models.Model):
 
 
 
+
+
+CHOICES = (
+    ("singel", "singel"),
+    ("married", "married"),
+
+)
+
+GENDER = (
+    ("Male","Male"),
+    ("Faleme","Famele"),
+    ("No","No"),
+)
+
+
+
+
 class Resident(models.Model):
     id = models.AutoField(primary_key=True)
     kebele = models.ForeignKey(Kebele, null=True,on_delete = models.CASCADE)
-    admin = models.ForeignKey(User, null=True,on_delete = models.CASCADE)
-    fname = models.CharField(max_length=100,null=True)
-    lname = models.CharField(max_length=100, null=True)
-    age = models.CharField(max_length=100,null=True,)
+    admin = models.OneToOneField(User, on_delete = models.CASCADE)
+    fname = models.CharField(max_length=50,null=True)
+    age = models.IntegerField(default=0)
     phone = models.CharField(max_length=20,null=True)
-    email = models.EmailField(null=True)
     address = models.CharField(max_length=150, null=True)
-    sex = models.CharField(max_length=50)
-    current_status = models.BooleanField(default=False, blank=False)
-    marital = models.BooleanField(default=False, blank=False)
-    death_date = models.ForeignKey(SessionYearModel,null=True, related_name='death', on_delete=models.CASCADE)
+    gender = models.CharField(max_length=50,choices=GENDER)
+    current_status = models.CharField(max_length=50, blank=False, choices=CHOICES)
+    marital_status =models.IntegerField(default=0)
     birth_date = models.ForeignKey(SessionYearModel, null=True, related_name="birth", on_delete=models.CASCADE)
+    avatar = models.ImageField(null=True, default="avatar.svg")
+    is_resident = models.BooleanField(default=False)
+    death_date = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    bio = models.TextField(null=True,)
+
     
     objects = models.Manager()
 
@@ -99,6 +118,9 @@ class Resident(models.Model):
     def __str__(self):
         return self.fname    
 
+
+
+
 class FeedBackResident(models.Model):
     id = models.AutoField(primary_key=True)
     resident_id = models.ForeignKey(Resident, on_delete=models.CASCADE)
@@ -108,36 +130,37 @@ class FeedBackResident(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
-class KebeleEmploye(models.Model):
+
+
+
+class KebeleEmployee(models.Model):
     id = models.AutoField(primary_key=True)
-    kebele = models.ForeignKey(Kebele, null=True, on_delete=models.CASCADE)
-    admin = models.ForeignKey(User, null=True, on_delete = models.CASCADE)
-    fname = models.CharField(max_length=100,null=True, blank=False)
-    lname = models.CharField(max_length=100, null=True,blank=False)
-    age = models.CharField(max_length=100,null=True,blank=False)
-    phone = models.CharField(max_length=20,null=True, blank=False)
-    email = models.EmailField(null=True)
-    address = models.CharField( max_length=150, null=True,blank=False)
-    sex = models.CharField(max_length=50, null=True, blank=False)
-    profile_pic = models.FileField(null=True)
-    qualification = models.BooleanField(default=True, blank=False)
-    bio = models.TextField(blank=True,null=True)
+    first_name = models.CharField(max_length=50,null=True)
+    last_name = models.CharField(max_length=50,null=True)
+    admin = models.OneToOneField(User, on_delete = models.CASCADE)
+    address = models.TextField()
+    is_employee = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+    
+
 
     class Meta:
 
-        verbose_name = 'KebeleEmploye'
-        verbose_name_plural = 'KebeleEmployes'
+        verbose_name = 'KebeleEmployee'
+        verbose_name_plural = 'KebeleEmployees'
 
 
     def __str__(self):
-        return self.fname    
+        return self.first_name    
+
+
+
 
 class LeaveReportKebele_employee(models.Model):
     id = models.AutoField(primary_key=True)
-    kebele_employee_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    kebele_employee_id = models.ForeignKey(KebeleEmployee, on_delete=models.CASCADE)
     leave_date = models.CharField(max_length=255)
     leave_message = models.TextField()
     leave_status = models.IntegerField(default=0)
@@ -145,30 +168,104 @@ class LeaveReportKebele_employee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
+    def __str__(self):
+        return self.leave_message[0:50]
+
+
+
 
 class FeedBackSkebele_employee(models.Model):
     id = models.AutoField(primary_key=True)
-    KebeleEmploye_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    KebeleEmploye_id = models.ForeignKey(KebeleEmployee, on_delete=models.CASCADE)
     feedback = models.TextField()
     feedback_reply = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
+    def __str__(self):
+        return self.feedback[0:10]
+
+
+
 
 class Notification_Kebele_employee(models.Model):
     id = models.AutoField(primary_key=True)
-    kebeleEmploye_id = models.ForeignKey(KebeleEmploye, on_delete=models.CASCADE)
+    kebeleEmploye_id = models.ForeignKey(KebeleEmployee, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = models.Manager()        
+    objects = models.Manager()
 
 
-        
+    def __str__(self):
+        return self.message[0:10]        
 
 
 
+
+class VitalEvant(models.Model):
+    id = models.AutoField(primary_key=True)
+    Kebele = models.OneToOneField(Kebele, related_name="kebeless", on_delete=models.CASCADE)  
+    resident = models.OneToOneField(Resident,related_name="reisdent", on_delete=models.CASCADE)  
+    brith_date = models.OneToOneField(SessionYearModel, related_name="brithss" ,on_delete=models.CASCADE, null=True, blank=True)
+    death_date = models.OneToOneField(SessionYearModel,related_name="deathss", on_delete=models.CASCADE, null=True, blank=True)
+    is_resident = models.BooleanField(default=False)
+    record_date =models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()  
+    
+
+
+
+class Marriage(models.Model):
+    id =  models.AutoField(primary_key=True)
+    residenr = models.OneToOneField(Resident,related_name='residents',on_delete=models.CASCADE)
+    kebele = models.OneToOneField(Kebele, related_name="kebeles",on_delete=models.CASCADE)
+    marital_status = models.CharField(max_length=100, default=False,choices=CHOICES)
+    brith_date = models.OneToOneField(SessionYearModel,on_delete=models.CASCADE, null=True, blank=True)
+    marriage_date = models.ForeignKey(SessionYearModel, null=True,blank=True, related_name="marriage_dates", on_delete=models.CASCADE)
+    given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
+    is_resident = models.BooleanField(default=False)
+    record_date =models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+
+
+
+
+
+class Death(models.Model):
+    id =  models.AutoField(primary_key=True)
+    residenr = models.OneToOneField(Resident,related_name='resident',on_delete=models.CASCADE)
+    kebele = models.OneToOneField(Kebele, related_name="kebelesa",on_delete=models.CASCADE)
+    marital_status = models.CharField(max_length=10, choices=CHOICES)
+    death_date = models.OneToOneField(SessionYearModel, null=True, related_name="death_dates", on_delete=models.CASCADE)
+    given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
+    is_resident = models.BooleanField(default=False)
+    record_date =models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+
+
+
+
+class Brith(models.Model):
+    id =  models.AutoField(primary_key=True)
+    residenr = models.OneToOneField(Resident,related_name='residentssa',on_delete=models.CASCADE)
+    kebele = models.ForeignKey(Kebele, related_name="kebelessss",on_delete=models.CASCADE)
+    marital_status = models.CharField(max_length=100, default=False,choices=CHOICES)
+    brith_date = models.ForeignKey(SessionYearModel, null=True, related_name="brith_datess", on_delete=models.CASCADE)
+    given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
+    is_resident = models.BooleanField(default=False)
+    record_date =models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+
+
+
+
+#Creating Django Signals
 
 @receiver(post_save, sender=User)
 # Now Creating a Function which will automatically insert data in Residents, kebele_ emp 
@@ -179,9 +276,9 @@ def create_user_profile(sender, instance, created, **kwargs):
         if instance.user_type == 1:
             SystemAdmin.objects.create(admin=instance)
         if instance.user_type == 2:
-            Resident.objects.create(admin=instance)
+            Resident.objects.create(admin=instance,kebele=Kebele.objects.get(id=1), profile_pic="", gender="",phone="",age="")
         if instance.user_type == 3:
-            KebeleEmploye.objects.create(admin=instance, kebele=Kebele.objects.get(id=1), address="", profile_pic="", sex="")
+            KebeleEmployee.objects.create(admin=instance, kebele=Kebele.objects.get(id=1),birth_date =SessionYearModel.objects.get(id=1), address="", profile_pic="", gender="",phone="",age="")
         
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
@@ -190,4 +287,4 @@ def save_user_profile(sender, instance, **kwargs):
     if instance.user_type == 2:
         instance.resident.save()
     if instance.user_type == 3:
-        instance.kebeleEmploye.save()
+        instance.kebeleEmployee.save()
