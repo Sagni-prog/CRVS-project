@@ -6,9 +6,8 @@ from django.views.decorators.cache import cache_control
 from django.core.files.storage import FileSystemStorage #To upload Profile Picture
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from entry.models import KebeleEmployee, Notification_Kebele_employee, LeaveReportKebele_employee, SessionYearModel, SystemAdmin, User,  Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
+from entry.models import KebeleEmployee, Notification_Kebele_employee, LeaveReportKebele_employee, SystemAdmin, User,  Resident, Kebele,FeedBackSkebele_employee, FeedBackResident
 from .forms import  KebeleForm, ResidentForm,KebeleEmployForm
-
 from django.core import serializers
 import json
 
@@ -121,7 +120,7 @@ def add_employee_save(request):
         last_name= request.POST.get('last_name')
 
         try:
-            user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=2)
+            user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=3)
             user.KebeleEmployee.address = address
             user.kebeleEmployee.first_name = first_name
             user.kebeleEmployee.last_name = last_name
@@ -134,8 +133,6 @@ def add_employee_save(request):
 
 
         
-
-
 
 
 

@@ -64,7 +64,8 @@ def loginPage(request):
                 return HttpResponse("admin Login")
                 # return redirect('admin_home')
             elif user_type == '2':
-                return redirect('kebelemployee_home')
+                # return redirect('kebelemployee_home')
+                 return redirect('kebeleemployee_home')
             elif user_type == '3':
                 return redirect('home')   
             else:
@@ -91,7 +92,7 @@ def get_user_details(request):
 
 def logout_User(request):
     logout(request)
-    return redirect('loginPage')
+    return redirect('home')
 
 
 def registerPage(request):
@@ -118,7 +119,7 @@ def registerPage(request):
             current_site = get_current_site(request)
             email_subject = "Confirm your Email @ Kebele.com!!"
             message2 = render_to_string('email_confirmation.html',{
-                'name': user.name,
+                'first_name': user.first_name,
                 'domain': current_site.domain,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': generate_token.make_token(user)
@@ -159,12 +160,9 @@ def activate(request,uidb64,token):
 
 
 def userProfile(request, pk):
-    user = Resident.objects.get(id=pk)
-    rooms = user.room_set.all()
-    room_messages = user.message_set.all()
-    topics = Kebele.objects.all()
-    context = {'user': user, 'rooms': rooms,
-               'room_messages': room_messages, 'topics': topics}
+    user = User.objects.get(id=pk)
+    context = {'user': user
+               }
     return render(request, 'base/profile.html', context)
 
 
@@ -173,11 +171,10 @@ def userProfile(request, pk):
 def updateUser(request):
     user = request.user
     form = ResidentForm(instance=user)
-
     if request.method == 'POST':
         form = ResidentForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
+            messages.success(request, "Your Account has been update ss!!")
             return redirect('user-profile', pk=user.id)
-
     return render(request, 'base/update-user.html', {'form': form})

@@ -13,27 +13,26 @@ from django.core.files.storage import FileSystemStorage
 class User(AbstractUser):
         user_type_data = ((1,"Systemadmin"),(2,"Resident"), (3,"KebeleEmployee"))
         user_type = models.CharField(default=1,choices=user_type_data, max_length=10)
-        name = models.CharField(max_length=100, null=True, blank=False)
+        first_name = models.CharField(max_length=100, null=True, blank=False)
         username = models.CharField(max_length=100, null=True,blank=False)
         email = models.EmailField(unique=True, null=True)
-        bio = models.TextField(null=True)
+        is_resident = models.BooleanField(default=False)
+        is_systemadmin = models.BooleanField(default=False)
+        is_KebeleEmployee = models.BooleanField(default=False)
+
+
+       
 
         avatar = models.ImageField(null=True, default="avatar.svg")
 
         USERNAME_FIELD = 'email'
    
-        REQUIRED_FIELDS = ['name','username']
+        REQUIRED_FIELDS = ['first_name','username']
   
 
 
 
         
-class SessionYearModel(models.Model):
-    id = models.AutoField(primary_key=True)
-    session_birth_date_year = models.DateField(blank=True)
-    session_death_date_year = models.DateField(blank=True)
-    is_system_admin = models.BooleanField(default=True)
-    objects = models.Manager()
 
 
 
@@ -99,10 +98,8 @@ class Resident(models.Model):
     gender = models.CharField(max_length=50,choices=GENDER)
     current_status = models.CharField(max_length=50, blank=False, choices=CHOICES)
     marital_status =models.IntegerField(default=0)
-    birth_date = models.ForeignKey(SessionYearModel, null=True, related_name="birth", on_delete=models.CASCADE)
-    avatar = models.ImageField(null=True, default="avatar.svg")
+    avatar = models.ImageField(null=True, default="avatar.svg",height_field=50, width_field=50) 
     is_resident = models.BooleanField(default=False)
-    death_date = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -208,9 +205,9 @@ class VitalEvant(models.Model):
     id = models.AutoField(primary_key=True)
     Kebele = models.OneToOneField(Kebele, related_name="kebeless", on_delete=models.CASCADE)  
     resident = models.OneToOneField(Resident,related_name="reisdent", on_delete=models.CASCADE)  
-    brith_date = models.OneToOneField(SessionYearModel, related_name="brithss" ,on_delete=models.CASCADE, null=True, blank=True)
-    death_date = models.OneToOneField(SessionYearModel,related_name="deathss", on_delete=models.CASCADE, null=True, blank=True)
     is_resident = models.BooleanField(default=False)
+    brith_date = models.DateTimeField(auto_now=True)
+    death_date =models.DateTimeField(auto_now=True)
     record_date =models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()  
@@ -223,8 +220,8 @@ class Marriage(models.Model):
     residenr = models.OneToOneField(Resident,related_name='residents',on_delete=models.CASCADE)
     kebele = models.OneToOneField(Kebele, related_name="kebeles",on_delete=models.CASCADE)
     marital_status = models.CharField(max_length=100, default=False,choices=CHOICES)
-    brith_date = models.OneToOneField(SessionYearModel,on_delete=models.CASCADE, null=True, blank=True)
-    marriage_date = models.ForeignKey(SessionYearModel, null=True,blank=True, related_name="marriage_dates", on_delete=models.CASCADE)
+    brith_date = models.DateTimeField(auto_now=True)
+    marriage_date = models.DateTimeField(auto_now=True)
     given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
     is_resident = models.BooleanField(default=False)
     record_date =models.DateTimeField(auto_now=True)
@@ -240,7 +237,7 @@ class Death(models.Model):
     residenr = models.OneToOneField(Resident,related_name='resident',on_delete=models.CASCADE)
     kebele = models.OneToOneField(Kebele, related_name="kebelesa",on_delete=models.CASCADE)
     marital_status = models.CharField(max_length=10, choices=CHOICES)
-    death_date = models.OneToOneField(SessionYearModel, null=True, related_name="death_dates", on_delete=models.CASCADE)
+    death_date = models.DateTimeField(auto_now=True)
     given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
     is_resident = models.BooleanField(default=False)
     record_date =models.DateTimeField(auto_now=True)
@@ -255,7 +252,7 @@ class Brith(models.Model):
     residenr = models.OneToOneField(Resident,related_name='residentssa',on_delete=models.CASCADE)
     kebele = models.ForeignKey(Kebele, related_name="kebelessss",on_delete=models.CASCADE)
     marital_status = models.CharField(max_length=100, default=False,choices=CHOICES)
-    brith_date = models.ForeignKey(SessionYearModel, null=True, related_name="brith_datess", on_delete=models.CASCADE)
+    brith_date = models.DateTimeField(auto_now=True)
     given_by = models.ForeignKey(KebeleEmployee,null=True,on_delete= models.CASCADE)
     is_resident = models.BooleanField(default=False)
     record_date =models.DateTimeField(auto_now=True)
@@ -276,9 +273,9 @@ def create_user_profile(sender, instance, created, **kwargs):
         if instance.user_type == 1:
             SystemAdmin.objects.create(admin=instance)
         if instance.user_type == 2:
-            Resident.objects.create(admin=instance,kebele=Kebele.objects.get(id=1), profile_pic="", gender="",phone="",age="")
+            Resident.objects.create(admin=instance)
         if instance.user_type == 3:
-            KebeleEmployee.objects.create(admin=instance, kebele=Kebele.objects.get(id=1),birth_date =SessionYearModel.objects.get(id=1), address="", profile_pic="", gender="",phone="",age="")
+            KebeleEmployee.objects.create(admin=instance)
         
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):

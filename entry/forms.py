@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 from django import forms 
 from django.forms import Form
-from entry.models import Resident, KebeleEmployee,Kebele, SessionYearModel,User
+from entry.models import Resident, KebeleEmployee,Kebele,User
 
 class DateInput(forms.DateInput):
     input_type = "date"
@@ -186,4 +186,4 @@ class MyUserCreationForm(UserCreationForm):
 class UserForm(ModelForm):
     class Meta:
         model = User
-        fields = ['avatar', 'name', 'username', 'email', 'bio']
+        fields = ['avatar', 'first_name', 'username', 'email', 'user_type']
